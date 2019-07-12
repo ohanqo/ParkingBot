@@ -16,24 +16,7 @@ const bot = new Slackbot({
     name: 'ParkingBot',
 });
 
-bot.on('start', () => {
-    app.post('/', function(req, res) {
-        const newNumberOfAvailablePlaces = req.body.numberOfAvailablePlaces;
-        const average = req.body.avg;
-        if (newNumberOfAvailablePlaces !== undefined && newNumberOfAvailablePlaces !== numberOfAvailablePlaces) {
-            numberOfAvailablePlaces = newNumberOfAvailablePlaces;
-            bot.postMessageToChannel('cars-detector', `Il reste ${numberOfAvailablePlaces} place(s).`, params);
-            if (average !== undefined) {
-                bot.postMessageToChannel('cars-detector', `Moyenne de ${average}.`, params);
-            }
-        }
-        res.send('Ok');
-    });
-
-    app.listen(3000, function() {
-        console.log('ParkingBot server listening on port 3000!');
-    });
-});
+bot.on('start', () => startExpressServer());
 
 bot.on('message', function(data) {
     if (data.type !== 'message' || data.subtype === 'bot_message') {
@@ -42,3 +25,20 @@ bot.on('message', function(data) {
 
     bot.postMessageToChannel('cars-detector', `Hey <@${data.user}>, il reste ${numberOfAvailablePlaces} place(s)`, params);
 });
+
+function startExpressServer() {
+    app.post('/', function(req, res) {
+        const newNumberOfAvailablePlaces = req.body.numberOfAvailablePlaces;
+
+        if (newNumberOfAvailablePlaces !== undefined && newNumberOfAvailablePlaces !== numberOfAvailablePlaces) {
+            numberOfAvailablePlaces = newNumberOfAvailablePlaces;
+            bot.postMessageToChannel('cars-detector', `Il reste ${numberOfAvailablePlaces} place(s).`, params);
+        }
+
+        res.send('Ok');
+    });
+
+    app.listen(3000, function() {
+        console.log('ParkingBot server listening on port 3000!');
+    });
+}
